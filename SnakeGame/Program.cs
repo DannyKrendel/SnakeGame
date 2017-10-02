@@ -9,14 +9,15 @@ namespace SnakeGame
     class Program
     {
         // Статистика
-        Stats stats = new Stats(32, 11, ConsoleColor.Black, ConsoleColor.White); // Статистика
-        public int speed = 200; // Скорость змейки
+        Stats stats = new Stats(32, 11, ConsoleColor.Black, ConsoleColor.White);
+        // Скорость змейки
+        public int speed = 200;
 
         public static void Main()
         {
             // Убрать курсор
             Console.CursorVisible = false;
-
+            // Вызов меню
             Program p = new Program();
             p.MenuSelect();
         }
@@ -46,14 +47,15 @@ namespace SnakeGame
 
             ConsoleKey ck;
             TextItem selected;
-
-            int idx; // Индекс выбранного пункта
+            // Индекс выбранного пункта
+            int idx;
 
             do
             {
                 ck = Console.ReadKey(true).Key;
                 selected = menu.SelectItem(ck, out idx);
             } while (ck != ConsoleKey.Enter);
+            // Мигание
             selected.Flickering(6, 80);
 
             switch (idx)
@@ -113,12 +115,14 @@ namespace SnakeGame
             // Движение змейки
             while (true)
             {
+                // Условия смерти змейки
                 if (walls.IsHit(snake) || snake.IsHitTail())
                 {
                     GameOver();
                     Thread.Sleep(2000);
                     MenuSelect();
                 }
+                // Змейка ест
                 if(snake.Eat(food))
                 {
                     do
@@ -128,6 +132,7 @@ namespace SnakeGame
                     food.Draw();
                     // Увеличение очков
                     stats.score += 10;
+                    // Параллельное увеличение рекорда
                     if (stats.score >= stats.highScore)
                         stats.highScore = stats.score;
                     // Увеличение длины
@@ -135,11 +140,12 @@ namespace SnakeGame
                 }
                 else
                 {
+                    // Движение змейки
                     snake.Move(fieldCh, ConsoleColor.DarkCyan, ConsoleColor.Cyan);
                     // Увеличение шагов
                     stats.moves++;
                 }
-
+                // Выбор следующего направления
                 if (Console.KeyAvailable)
                 {
                     ConsoleKey direction = Console.ReadKey(true).Key;
@@ -148,7 +154,7 @@ namespace SnakeGame
 
                 // Показ статистики
                 stats.Show();
-
+                // Установка скорости
                 Thread.Sleep(speed);
             }
         }
@@ -156,6 +162,7 @@ namespace SnakeGame
         public void Settings()
         {
             Console.Clear();
+            // Инициализация пунктов настройки
             List<TextItem> itemList;
             TextItem item1 = new TextItem(1, 1, "СКОРОСТЬ ЗМЕЙКИ".PadBoth(31), ConsoleColor.Black, ConsoleColor.Green);
             TextItem item2 = new TextItem(1, 2, "ВЕРНУТЬСЯ".PadBoth(31), ConsoleColor.Black, ConsoleColor.Green);
@@ -163,7 +170,7 @@ namespace SnakeGame
             itemList = new List<TextItem> { item1, item2 };
 
             Menu menu = new Menu(itemList, ConsoleColor.Black, ConsoleColor.Green);
-
+            // Всё то же, что и в главном меню
             menu.Show();
 
             menu.items[0].ReverseColors();
@@ -172,7 +179,7 @@ namespace SnakeGame
             ConsoleKey ck;
             TextItem selected;
 
-            int idx; // Индекс выбранного пункта
+            int idx;
 
             do
             {
@@ -199,11 +206,12 @@ namespace SnakeGame
 
         public void GameOver()
         {
+            // Установка нового рекорда
             if (stats.score > stats.highScore)
                 stats.highScore = stats.score;
-
+            // Увеличение счетчика смертей
             stats.deathCount++;
-
+            // Game Over текст
             TextItem line1 = new TextItem(10, 5, "============================".PadBoth(33), ConsoleColor.DarkRed, ConsoleColor.Yellow);
             TextItem line2 = new TextItem(10, 6, "И Г Р А    О К О Н Ч Е Н А".PadBoth(33), ConsoleColor.DarkRed, ConsoleColor.Yellow);
             TextItem line3 = new TextItem(10, 7, $"ВАШ СЧЕТ: {stats.score}".PadBoth(33), ConsoleColor.DarkRed, ConsoleColor.Yellow);
@@ -216,7 +224,7 @@ namespace SnakeGame
             line4.Show();
             line5.Show();
         }
-
+        // Выход из игры
         static void Exit()
         {
             Environment.Exit(0);
@@ -228,7 +236,8 @@ namespace System
 {
     public static class StringExtensions
     {
-        public static string PadBoth(this string str, int length) // Выравнивание текста
+        // Выравнивание текста по центру
+        public static string PadBoth(this string str, int length)
         {
             int spaces = length - str.Length;
             int padLeft = spaces / 2 + str.Length;

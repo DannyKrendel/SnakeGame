@@ -84,7 +84,7 @@ namespace SnakeGame
 
         public override string ToString()
         {
-            return x + ", " + y + ", " + sym;
+            return X + ", " + Y + ", " + Ch;
         }
     }
 }
