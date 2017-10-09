@@ -8,77 +8,67 @@ namespace SnakeGame
 {
     class Snake : Figure
     {
-        // Символы змейки
-        char headCh;
-        char tailCh;
+        // Символ змейки
+        char bodyCh;
         // Длина
-        internal int length;
+        public static int Length { get; set; }
         // Направление
         Direction direction;
 
-        public Snake(Point tailP, char headCh, int length, ConsoleColor bgColor, ConsoleColor fgColor, Direction direction) : base(bgColor, fgColor)
+        ConsoleColor bgColor;
+        ConsoleColor fgColor;
+
+        public Snake(Point p, int length, Direction direction, ConsoleColor bgColor = ConsoleColor.Black, ConsoleColor fgColor = ConsoleColor.White)
         {
-            this.headCh = headCh;
-            tailCh = tailP.Ch;
             pList = new List<Point>();
+
+            bodyCh = p.Ch;
+
+            Length = length;
+
             this.direction = direction;
+
+            this.bgColor = bgColor;
+            this.fgColor = fgColor;
 
             for (int i = 0; i < length; i++)
             {
-                Point p = Point.Clone(tailP);
-                this.length = length;
-                p.Move(i, direction);
-                if (i == length - 1)
-                {
-                    Point head = new Point(p.X, p.Y, headCh, bgColor, fgColor);
-                    pList.Add(head);
-                }
-                else
-                {
-                    pList.Add(p);
-                }
+                Point body = new Point(p);
+                body.Move(i, direction);
+                pList.Add(body);
             }
         }
 
-        public void Move(char ch = ' ', ConsoleColor bgColor = ConsoleColor.Black, ConsoleColor fgColor = ConsoleColor.White)
+        public void Move()
         {
+            // Удалить хвост
             Point tail = pList.First();
             pList.Remove(tail);
-            tail.Replace(ch);
+            tail.Undraw(bgColor, fgColor);
 
-            Point previous = pList.Last();
-
+            // Добавить голову
             Point head = GetNextPoint();
             pList.Add(head);
-
-            // Внешние изменения
-            previous.Replace(tailCh);
-            previous.Draw();
-            tail.Draw();
-            head.Draw();
+            head.Draw(bgColor, fgColor);
         }
 
         public bool Eat(Point food)
         {
-            Point previous = pList.Last();
-
             Point head = GetNextPoint();
 
             if (head.IsHit(food))
             {
-                previous.Replace(tailCh);
-                previous.Draw();
                 pList.Add(head);
-                head.Draw();
+                head.Draw(bgColor, fgColor);
                 return true;
             }
             return false;
         }
 
-        private Point GetNextPoint()
+        public Point GetNextPoint()
         {
             Point head = pList.Last();
-            Point nextPoint = Point.Clone(head);
+            Point nextPoint = new Point(head);
             nextPoint.Move(1, direction);
             return nextPoint;
         }
@@ -106,10 +96,16 @@ namespace SnakeGame
             }
         }
 
-        public bool IsHitTail()
+        public bool IsWallHit(int width, int height)
         {
-            Point head = pList.Last();
-            for (int i = 0; i < pList.Count - 2; i++) // Проверка для всех точек кроме головы
+            Point head = GetNextPoint();
+            return head.X == 0 || head.X == width || head.Y == 0 || head.Y == height;
+        }
+
+        public bool IsTailHit()
+        {
+            Point head = GetNextPoint();
+            for (int i = 0; i < pList.Count - 2; i++)
             {
                 if (head.IsHit(pList[i]))
                     return true;

@@ -6,20 +6,15 @@ using System.Threading;
 
 namespace SnakeGame
 {
-    class Figure : ColorObject
+    class Figure : IColor
     {
         protected List<Point> pList;
 
-        public Figure(ConsoleColor bgColor, ConsoleColor fgColor) : base(bgColor, fgColor)
-        {
-            
-        }
-
-        internal void Draw()
+        public void Draw(ConsoleColor bgColor = ConsoleColor.Black, ConsoleColor fgColor = ConsoleColor.White)
         {
             foreach (Point p in pList)
             {
-                p.Draw();
+                p.Draw(bgColor, fgColor);
             }
         }
 

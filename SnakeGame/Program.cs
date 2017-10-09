@@ -8,15 +8,17 @@ namespace SnakeGame
 {
     class Program
     {
-        // Статистика
-        Stats stats = new Stats(32, 11, ConsoleColor.Black, ConsoleColor.White);
         // Скорость змейки
-        public int speed = 200;
+        public static double Speed = 4;
 
         public static void Main()
         {
+            // Инициализация статистики
+            Stats.Initialize(32, 11);
+
             // Убрать курсор
             Console.CursorVisible = false;
+
             // Вызов меню
             Program p = new Program();
             p.MenuSelect();
@@ -25,40 +27,37 @@ namespace SnakeGame
         public void MenuSelect()
         {
             Console.Clear();
-            // Установка размера окна
+
+            // Установка размера окна меню
             int width = 33;
             int height = 6;
             Console.SetWindowSize(width + 1, height + 1);
 
-            // Отрисовка рамки
-            Walls frame = new Walls(width, height, '*', ConsoleColor.Black, ConsoleColor.Yellow);
-            frame.Draw();
-            // Пункты меню
+            // Отрисовка рамки вокруг меню
+            Walls frame = new Walls(width, height, '*');
+            frame.Draw(ConsoleColor.Black, ConsoleColor.Yellow);
+
+            // Название игры и пункты меню
             TextItem title = new TextItem(1, 1, "~~~~~~~~~~~~ЗМЕЙКА~~~~~~~~~~~~".PadBoth(31), ConsoleColor.DarkBlue, ConsoleColor.Green);
-            string[] items = { "НАЧАТЬ ИГРУ".PadBoth(31), "НАСТРОЙКИ".PadBoth(31), "ВЫХОД".PadBoth(31) };
-            // Передача пунктов и их цвета
-            Menu menu = new Menu(1, 2, items, ConsoleColor.DarkCyan, ConsoleColor.Green);
+
+            List<TextItem> items = new List<TextItem>
+            {
+                new TextItem(1, 2, "НАЧАТЬ ИГРУ".PadBoth(31), ConsoleColor.DarkGreen, ConsoleColor.Green),
+                new TextItem(1, 3, "НАСТРОЙКИ".PadBoth(31),   ConsoleColor.DarkGreen, ConsoleColor.Green),
+                new TextItem(1, 4, "ВЫХОД".PadBoth(31),       ConsoleColor.DarkGreen, ConsoleColor.Green)
+            };
+
+            // Передача пунктов в функцию
+            Menu menu = new Menu(items);
+
             // Показ названия и меню
             title.Show();
             menu.Show();
-            // Выделить цветом и показать первый пункт
-            menu.items[0].ReverseColors();
-            menu.items[0].Show();
 
-            ConsoleKey ck;
-            TextItem selected;
             // Индекс выбранного пункта
-            int idx;
+            int selected = menu.SelectItem();
 
-            do
-            {
-                ck = Console.ReadKey(true).Key;
-                selected = menu.SelectItem(ck, out idx);
-            } while (ck != ConsoleKey.Enter);
-            // Мигание
-            selected.Flickering(6, 80);
-
-            switch (idx)
+            switch (selected)
             {
                 case 0:
                     Game();
@@ -78,7 +77,7 @@ namespace SnakeGame
             char fieldCh = ' ';
             char wallCh = '#';
 
-            // Установка размера окна
+            // Установка размера окна игры
             int width = 55;
             int height = 15;
             Console.SetWindowSize(width + 1, height + 1);
@@ -88,63 +87,37 @@ namespace SnakeGame
             int rows = 15;
 
             // Отрисовка поля и стен
-            Field field = new Field(columns, rows, fieldCh, ConsoleColor.DarkCyan, ConsoleColor.Cyan);
-            field.Draw();
-            Walls walls = new Walls(columns, rows, wallCh, ConsoleColor.Black, ConsoleColor.DarkGreen);
-            walls.Draw();
+            Field field = new Field(columns, rows, fieldCh);
+            field.Draw(ConsoleColor.DarkCyan, ConsoleColor.Cyan);
+            Walls walls = new Walls(columns, rows, wallCh);
+            walls.Draw(ConsoleColor.Black, ConsoleColor.DarkGreen);
 
             // Обнуление и отрисовка статистики
-            stats.SetToZero();
-            stats.Show();
+            Stats.SetToZero();
+            Stats.Show();
 
             // Отрисовка змейки
-            Point tail = new Point(1, 1, 'o', ConsoleColor.DarkCyan, ConsoleColor.Green);
-            char headCh = 'O';
-            Snake snake = new Snake(tail, headCh, 3, ConsoleColor.DarkCyan, ConsoleColor.Green, Direction.Right);
-            snake.Draw();
+            Point tail = new Point(1, 1, 'o');
+            Snake snake = new Snake(tail, 3, Direction.Right, ConsoleColor.DarkCyan, ConsoleColor.Green);
+            snake.Draw(ConsoleColor.DarkCyan, ConsoleColor.Green);
 
             // Передача длины змейки
-            stats.length = snake.length;
+            Stats.Length = Snake.Length;
 
             // Еда
-            field.GetLimits(out Point p1, out Point p2);
-            FoodSpawner foodSpawner = new FoodSpawner(p1, p2, '♦', ConsoleColor.DarkCyan, ConsoleColor.Red);
-            Point food = foodSpawner.Spawn();
-            food.Draw();
+            FoodSpawner foodSpawner = new FoodSpawner(walls.Width, walls.Height, '♦');
+            foodSpawner.Initialize();
+            FoodSpawner.Food.Draw(ConsoleColor.DarkCyan, ConsoleColor.Red);
+
+            // Установка скорости по умолчанию
+            double speed = Speed;
+
+            // Ускорение в процентах
+            double modifier = 5;
 
             // Движение змейки
             while (true)
             {
-                // Условия смерти змейки
-                if (walls.IsHit(snake) || snake.IsHitTail())
-                {
-                    GameOver();
-                    Thread.Sleep(2000);
-                    MenuSelect();
-                }
-                // Змейка ест
-                if(snake.Eat(food))
-                {
-                    do
-                    {
-                        food = foodSpawner.Spawn();
-                    } while (snake.IsHit(food));
-                    food.Draw();
-                    // Увеличение очков
-                    stats.score += 10;
-                    // Параллельное увеличение рекорда
-                    if (stats.score >= stats.highScore)
-                        stats.highScore = stats.score;
-                    // Увеличение длины
-                    stats.length++;
-                }
-                else
-                {
-                    // Движение змейки
-                    snake.Move(fieldCh, ConsoleColor.DarkCyan, ConsoleColor.Cyan);
-                    // Увеличение шагов
-                    stats.moves++;
-                }
                 // Выбор следующего направления
                 if (Console.KeyAvailable)
                 {
@@ -152,10 +125,42 @@ namespace SnakeGame
                     snake.HandleKey(direction);
                 }
 
+                // Условия смерти змейки
+                if (snake.IsWallHit(walls.Width, walls.Height) || snake.IsTailHit())
+                {
+                    GameOver();
+                    Thread.Sleep(2000);
+                    MenuSelect();
+                }
+                // Змейка ест
+                if (snake.Eat(FoodSpawner.Food))
+                {
+                    do
+                    {
+                        foodSpawner.Initialize();
+                    } while (snake.IsHit(FoodSpawner.Food));
+                    FoodSpawner.Food.Draw(ConsoleColor.DarkCyan, ConsoleColor.Red);
+                    // Увеличение очков
+                    Stats.Score += 10;
+                    // Параллельное увеличение рекорда
+                    if (Stats.Score >= Stats.HighScore)
+                        Stats.HighScore = Stats.Score;
+                    // Увеличение длины
+                    Stats.Length++;
+                    Speed += Speed / 100 * modifier;
+                }
+                else
+                {
+                    // Движение змейки
+                    snake.Move();
+                    // Увеличение шагов
+                    Stats.Moves++;
+                }
+
                 // Показ статистики
-                stats.Show();
+                Stats.Show();
                 // Установка скорости
-                Thread.Sleep(speed);
+                Thread.Sleep(1000 / (int)speed);
             }
         }
 
@@ -163,38 +168,30 @@ namespace SnakeGame
         {
             Console.Clear();
             // Инициализация пунктов настройки
-            List<TextItem> itemList;
-            TextItem item1 = new TextItem(1, 1, "СКОРОСТЬ ЗМЕЙКИ".PadBoth(31), ConsoleColor.Black, ConsoleColor.Green);
-            TextItem item2 = new TextItem(1, 2, "ВЕРНУТЬСЯ".PadBoth(31), ConsoleColor.Black, ConsoleColor.Green);
+            List<TextItem> itemList = new List<TextItem>
+            {
+                new TextItem(1, 1, "СКОРОСТЬ ЗМЕЙКИ".PadBoth(31), ConsoleColor.Black, ConsoleColor.Green),
+                new TextItem(1, 2, "ВЕРНУТЬСЯ".PadBoth(31),       ConsoleColor.Black, ConsoleColor.Green),
+            };
 
-            itemList = new List<TextItem> { item1, item2 };
+            TextItem title = new TextItem(1, 0, "~~~~~~~~~~~НАСТРОЙКИ~~~~~~~~~~~".PadBoth(31), ConsoleColor.Black, ConsoleColor.White);
 
-            Menu menu = new Menu(itemList, ConsoleColor.Black, ConsoleColor.Green);
+            Menu menu = new Menu(itemList);
+
             // Всё то же, что и в главном меню
+            title.Show();
             menu.Show();
 
-            menu.items[0].ReverseColors();
-            menu.items[0].Show();
+            int selected = menu.SelectItem();
 
-            ConsoleKey ck;
-            TextItem selected;
-
-            int idx;
-
-            do
-            {
-                ck = Console.ReadKey(true).Key;
-                selected = menu.SelectItem(ck, out idx);
-            } while (ck != ConsoleKey.Enter);
-            selected.Flickering(6, 80);
-
-            switch (idx)
+            switch (selected)
             {
                 case 0:
+                    Console.WriteLine("Текущая скорость змейки: " + Speed);
                     Console.Write("Установите скорость змейки: ");
                     if (int.TryParse(Console.ReadLine(), out int speed))
                     {
-                        this.speed = speed;
+                        Speed = speed;
                     }
                     Settings();
                     break;
@@ -207,16 +204,18 @@ namespace SnakeGame
         public void GameOver()
         {
             // Установка нового рекорда
-            if (stats.score > stats.highScore)
-                stats.highScore = stats.score;
+            if (Stats.Score > Stats.HighScore)
+                Stats.HighScore = Stats.Score;
+
             // Увеличение счетчика смертей
-            stats.deathCount++;
+            Stats.DeathCount++;
+
             // Game Over текст
-            TextItem line1 = new TextItem(10, 5, "============================".PadBoth(33), ConsoleColor.DarkRed, ConsoleColor.Yellow);
-            TextItem line2 = new TextItem(10, 6, "И Г Р А    О К О Н Ч Е Н А".PadBoth(33), ConsoleColor.DarkRed, ConsoleColor.Yellow);
-            TextItem line3 = new TextItem(10, 7, $"ВАШ СЧЕТ: {stats.score}".PadBoth(33), ConsoleColor.DarkRed, ConsoleColor.Yellow);
-            TextItem line4 = new TextItem(10, 8, $"ВАШ РЕКОРД: {stats.highScore}".PadBoth(33), ConsoleColor.DarkRed, ConsoleColor.Yellow);
-            TextItem line5 = new TextItem(10, 9, "============================".PadBoth(33), ConsoleColor.DarkRed, ConsoleColor.Yellow);
+            TextItem line1 = new TextItem(10, 5, "============================".PadBoth(33),   ConsoleColor.DarkRed, ConsoleColor.Yellow);
+            TextItem line2 = new TextItem(10, 6, "И Г Р А    О К О Н Ч Е Н А".PadBoth(33),     ConsoleColor.DarkRed, ConsoleColor.Yellow);
+            TextItem line3 = new TextItem(10, 7, $"ВАШ СЧЕТ: {Stats.Score}".PadBoth(33),       ConsoleColor.DarkRed, ConsoleColor.Yellow);
+            TextItem line4 = new TextItem(10, 8, $"ВАШ РЕКОРД: {Stats.HighScore}".PadBoth(33), ConsoleColor.DarkRed, ConsoleColor.Yellow);
+            TextItem line5 = new TextItem(10, 9, "============================".PadBoth(33),   ConsoleColor.DarkRed, ConsoleColor.Yellow);
 
             line1.Show();
             line2.Show();

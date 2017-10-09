@@ -6,49 +6,56 @@ using System.Threading;
 
 namespace SnakeGame
 {
-    class Stats : ColorObject
+    static class Stats
     {
         // Координаты текста
-        int writeX, writeY;
+        public static int X { get; set; }
+        public static int Y { get; set; }
         // Счетчики
-        internal int score;
-        internal int highScore;
-        internal int length;
-        internal int moves;
-        internal int deathCount;
+        public static int Score { get; set; }
+        public static int HighScore { get; set; }
+        public static int Length { get; set; }
+        public static int Moves { get; set; }
+        public static int DeathCount { get; set; }
 
-        TextItem text1, text2, text3, text4, text5;
-
-        public Stats(int writeX, int writeY, ConsoleColor bgColor, ConsoleColor fgColor) : base (bgColor, fgColor)
+        public static void Initialize(int writeX, int writeY)
         {
-            this.writeX = writeX;
-            this.writeY = writeY;
-            score = 0;
-            highScore = 0;
-            length = 0;
-            moves = 0;
-            deathCount = 0;
+            X = writeX;
+            Y = writeY;
+
+            Score = 0;
+            HighScore = 0;
+            Length = Snake.Length;
+            Moves = 0;
+            DeathCount = 0;
         }
 
-        public void Show()
+        public static void Show(ConsoleColor bgColor = ConsoleColor.Black, ConsoleColor fgColor = ConsoleColor.White)
         {
-            text1 = new TextItem(writeX, writeY, $"Ваш счет: {score}", bgColor, fgColor);
-            text2 = new TextItem(writeX, writeY + 1, $"Ваш рекорд: {highScore}", bgColor, fgColor);
-            text3 = new TextItem(writeX, writeY + 2, $"Длина змейки: {length}", bgColor, fgColor);
-            text4 = new TextItem(writeX, writeY + 3, $"Шагов сделано: {moves}", bgColor, fgColor);
-            text5 = new TextItem(writeX, writeY + 4, $"Смертей: {deathCount}", bgColor, fgColor);
-            text1.Show();
-            text2.Show();
-            text3.Show();
-            text4.Show();
-            text5.Show();
+            Console.SetCursorPosition(X, Y);
+
+            Console.BackgroundColor = bgColor;
+            Console.ForegroundColor = fgColor;
+
+            Console.WriteLine($"Ваш счет: {Score}");
+            Console.CursorLeft = X;
+            Console.WriteLine($"Ваш рекорд: {HighScore}");
+            Console.CursorLeft = X;
+            Console.WriteLine($"Длина змейки: {Length}");
+            Console.CursorLeft = X;
+            Console.WriteLine($"Пройденное расстояние: {Moves}");
+            Console.CursorLeft = X;
+            Console.Write($"Смертей: {DeathCount}");
+
+            Console.ResetColor();
         }
 
-        public void SetToZero()
+        public static void SetToZero()
         {
-            score = 0;
-            length = 3;
-            moves = 0;
+            Score = 0;
+            Length = 3;
+            Moves = 0;
+            DeathCount = 0;
         }
     }
 }

@@ -42,7 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ColorObject.cs" />
+    <Compile Include="IColor.cs" />
     <Compile Include="Figure.cs" />
     <Compile Include="Direction.cs" />
     <Compile Include="Field.cs" />

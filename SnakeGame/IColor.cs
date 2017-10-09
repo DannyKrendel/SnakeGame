@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace SnakeGame
 {
-    enum Direction
+    interface IColor
     {
-        Left,
-        Right,
-        Up,
-        Down
+        void Draw(ConsoleColor bgColor, ConsoleColor fgColor);
     }
 }

@@ -11,7 +11,7 @@ namespace SnakeGame
         char lineCh;
         Direction direction;
 
-        public Line(int x, int y, int length, char ch, ConsoleColor bgColor, ConsoleColor fgColor, Direction dir) : base (bgColor, fgColor)
+        public Line(int x, int y, int length, char ch, Direction dir)
         {
             pList = new List<Point>();
             lineCh = ch;
@@ -22,28 +22,28 @@ namespace SnakeGame
                 case Direction.Left:
                     for (int i = x; i > x - length; i--)
                     {
-                        Point p = new Point(i, y, lineCh, bgColor, fgColor);
+                        Point p = new Point(i, y, lineCh);
                         pList.Add(p);
                     }
                     break;
                 case Direction.Right:
                     for (int i = x; i < x + length; i++)
                     {
-                        Point p = new Point(i, y, lineCh, bgColor, fgColor);
+                        Point p = new Point(i, y, lineCh);
                         pList.Add(p);
                     }
                     break;
                 case Direction.Up:
                     for (int i = y; i > y - length; i--)
                     {
-                        Point p = new Point(x, i, lineCh, bgColor, fgColor);
+                        Point p = new Point(x, i, lineCh);
                         pList.Add(p);
                     }
                     break;
                 case Direction.Down:
                     for (int i = y; i < y + length; i++)
                     {
-                        Point p = new Point(x, i, lineCh, bgColor, fgColor);
+                        Point p = new Point(x, i, lineCh);
                         pList.Add(p);
                     }
                     break;
