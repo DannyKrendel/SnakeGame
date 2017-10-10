@@ -8,108 +8,123 @@ namespace SnakeGame
 {
     class Snake : Figure
     {
-        // Символы змейки
-        char headCh;
-        char tailCh;
-        // Длина
-        internal int length;
-        // Направление
-        Direction direction;
+        // Символ змейки
+        char bodyCh;
 
-        public Snake(Point tailP, char headCh, int length, ConsoleColor bgColor, ConsoleColor fgColor, Direction direction) : base(bgColor, fgColor)
+        // Длина змейки
+        int length;
+        public int Length
         {
-            this.headCh = headCh;
-            tailCh = tailP.Ch;
-            pList = new List<Point>();
-            this.direction = direction;
-
-            for (int i = 0; i < length; i++)
+            get => length;
+            set
             {
-                Point p = Point.Clone(tailP);
-                this.length = length;
-                p.Move(i, direction);
-                if (i == length - 1)
-                {
-                    Point head = new Point(p.X, p.Y, headCh, bgColor, fgColor);
-                    pList.Add(head);
-                }
-                else
-                {
-                    pList.Add(p);
-                }
+                if (value > 0)
+                    length = value;
             }
         }
 
-        public void Move(char ch = ' ', ConsoleColor bgColor = ConsoleColor.Black, ConsoleColor fgColor = ConsoleColor.White)
+        // Направление змейки
+        public Direction Direction{ get; set; }
+
+        // Точка начала змейки (хвост), начальная длина, начальное направление
+        public Snake(Point p, int length, Direction direction)
+        {
+            pList = new List<Point>();
+
+            bodyCh = p.Ch;
+
+            Length = length;
+
+            Direction = direction;
+
+            // Добавление точек в список
+            for (int i = 0; i < Length; i++)
+            {
+                Point body = new Point(p);
+                body.Move(i, direction);
+                body.SetColor(bgColor, fgColor);
+                pList.Add(body);
+            }
+        }
+
+        // Движение змейки
+        public void Move()
         {
             Point tail = pList.First();
-            pList.Remove(tail);
-            tail.Replace(ch);
-
-            Point previous = pList.Last();
-
             Point head = GetNextPoint();
+            pList.Remove(tail);
             pList.Add(head);
-
-            // Внешние изменения
-            previous.Replace(tailCh);
-            previous.Draw();
-            tail.Draw();
+            // Стирание хвоста
+            tail.Undraw();
+            // Рисование головы
+            head.SetColor(bgColor, fgColor);
             head.Draw();
         }
 
+        // Проверка поглощения пищи
         public bool Eat(Point food)
         {
-            Point previous = pList.Last();
-
             Point head = GetNextPoint();
 
             if (head.IsHit(food))
             {
-                previous.Replace(tailCh);
-                previous.Draw();
                 pList.Add(head);
+                head.SetColor(bgColor, fgColor);
                 head.Draw();
                 return true;
             }
             return false;
         }
 
-        private Point GetNextPoint()
+        // Следующая точка после головы в текущем направлении
+        public Point GetNextPoint()
         {
             Point head = pList.Last();
-            Point nextPoint = Point.Clone(head);
-            nextPoint.Move(1, direction);
+            Point nextPoint = new Point(head);
+            nextPoint.Move(1, Direction);
             return nextPoint;
         }
 
-        public void HandleKey(ConsoleKey key)
+        // Выбор направления
+        public void HandleKey()
         {
-            switch (key)
+            if (Console.KeyAvailable)
             {
-                case ConsoleKey.LeftArrow:
-                    if (direction != Direction.Right)
-                        direction = Direction.Left;
-                    break;
-                case ConsoleKey.RightArrow:
-                    if (direction != Direction.Left)
-                        direction = Direction.Right;
-                    break;
-                case ConsoleKey.UpArrow:
-                    if (direction != Direction.Down)
-                        direction = Direction.Up;
-                    break;
-                case ConsoleKey.DownArrow:
-                    if (direction != Direction.Up)
-                        direction = Direction.Down;
-                    break;
+                ConsoleKeyInfo cki = Console.ReadKey(true);
+                switch (cki.Key)
+                {
+                    case ConsoleKey.LeftArrow:
+                        if (Direction != Direction.Right)
+                            Direction = Direction.Left;
+                        break;
+                    case ConsoleKey.RightArrow:
+                        if (Direction != Direction.Left)
+                            Direction = Direction.Right;
+                        break;
+                    case ConsoleKey.UpArrow:
+                        if (Direction != Direction.Down)
+                            Direction = Direction.Up;
+                        break;
+                    case ConsoleKey.DownArrow:
+                        if (Direction != Direction.Up)
+                            Direction = Direction.Down;
+                        break;
+                }
             }
         }
 
-        public bool IsHitTail()
+        // Столкнулась ли змейка со стеной
+        public bool IsWallHit(int width, int height)
         {
-            Point head = pList.Last();
-            for (int i = 0; i < pList.Count - 2; i++) // Проверка для всех точек кроме головы
+            Point head = GetNextPoint();
+            return head.X == 0 || head.X == width || head.Y == 0 || head.Y == height;
+        }
+
+        // Столкнулась ли змейка с хвостом
+        public bool IsTailHit()
+        {
+            Point head = GetNextPoint();
+            for (int i = 0; i < pList.Count - 2; i++)
             {
                 if (head.IsHit(pList[i]))
                     return true;

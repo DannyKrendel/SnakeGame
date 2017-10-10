@@ -6,26 +6,31 @@ using System.Threading;
 
 namespace SnakeGame
 {
-    class FoodSpawner : ColorObject
+    class FoodSpawner
     {
-        Point p1;
-        Point p2;
-        char foodCh;
+        // Границы зоны, в которой будет появляться еда
+        int width, height;
+        // Символы еды
+        string symbols;
+        // Текущая точка еды
+        public static Point Food;
 
         Random rand = new Random();
 
-        public FoodSpawner(Point p1, Point p2, char ch, ConsoleColor bgColor, ConsoleColor fgColor) : base(bgColor, fgColor)
+        public FoodSpawner(int width, int height, string symbols)
         {
-            this.p1 = Point.Clone(p1);
-            this.p2 = Point.Clone(p2);
-            foodCh = ch;
+            Food = new Point();
+            this.width = width;
+            this.height = height;
+            this.symbols = symbols;
         }
 
-        public Point Spawn()
+        // Инициализация новых координат и символа еды
+        public void Initialize()
         {
-            int x = rand.Next(p1.X + 1, p2.X - 1);
-            int y = rand.Next(p1.Y + 1, p2.Y - 1);
-            return new Point(x, y, foodCh, bgColor, fgColor);
+            Food.X = rand.Next(1, width - 1);
+            Food.Y = rand.Next(1, height - 1);
+            Food.Ch = symbols[rand.Next(symbols.Length)];
         }
     }
 }

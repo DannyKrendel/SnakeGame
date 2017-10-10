@@ -6,55 +6,71 @@ using System.Threading;
 
 namespace SnakeGame
 {
-    class Menu : ColorObject
+    class Menu : Colored
     {
-        internal List<TextItem> items; // Пункты меню
-        int selectedItem = 0; // Выбранный пункт
+        // Список пунктов меню
+        List<TextItem> items;
 
-        public Menu(List<TextItem> items, ConsoleColor bgColor, ConsoleColor fgColor) : base(bgColor, fgColor)
+        // Выбранный пункт
+        int selectedItem = 0;
+
+        public int SelectedItem
+        {
+            get => selectedItem;
+            set
+            {
+                // Предотвращение обращения к несуществующему пункту
+                if (value >= 0 && value < items.Count)
+                {
+                    selectedItem = value;
+                }
+            }
+        }
+
+        // Помещение пунктов в список
+        public Menu(List<TextItem> items)
         {
             this.items = new List<TextItem>(items);
         }
 
-        public Menu(int x, int y, string[] str, ConsoleColor bgColor, ConsoleColor fgColor) : base(bgColor, fgColor)
-        {
-            Console.SetCursorPosition(x, y);
-            items = new List<TextItem>();
-            for (int i = 0; i < str.Length; i++)
-            {
-                TextItem item = new TextItem(x, y++, str[i], bgColor, fgColor);
-                items.Add(item);
-            }
-        }
-
-        public void Show() // Вывод меню
+        // Вывод меню
+        public void Show()
         {
             foreach (TextItem item in items)
             {
+                item.SetColor(bgColor, fgColor);
                 item.Show();
             }
         }
 
-        public TextItem SelectItem(ConsoleKey cKey, out int index)
+        // Выбор пункта
+        public int SelectItem()
         {
-            items[selectedItem].ReverseColors();
-            items[selectedItem].Show();
-
-            if (cKey == ConsoleKey.DownArrow && selectedItem + 1 < items.Count)
+            items[SelectedItem].ReverseColors();
+            items[SelectedItem].Show();
+            while (true)
             {
-                selectedItem++;
+                if (Console.KeyAvailable)
+                {
+                    items[SelectedItem].ReverseColors();
+                    items[SelectedItem].Show();
+                    ConsoleKeyInfo cki = Console.ReadKey(true);
+                    switch (cki.Key)
+                    {
+                        case ConsoleKey.DownArrow:
+                            SelectedItem++;
+                            break;
+                        case ConsoleKey.UpArrow:
+                            SelectedItem--;
+                            break;
+                        case ConsoleKey.Enter:
+                            items[SelectedItem].Flickering(6, 5);
+                            return SelectedItem;
+                    }
+                    items[SelectedItem].ReverseColors();
+                    items[SelectedItem].Show();
+                }
             }
-            if (cKey == ConsoleKey.UpArrow && selectedItem > 0)
-            {
-                selectedItem--;
-            }
-
-            items[selectedItem].ReverseColors();
-            items[selectedItem].Show();
-
-            index = selectedItem;
-
-            return items[selectedItem];
         }
     }
 }

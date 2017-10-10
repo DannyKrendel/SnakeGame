@@ -6,46 +6,43 @@ using System.Threading;
 
 namespace SnakeGame
 {
-    class TextItem : ColorObject
+    class TextItem : Colored
     {
         int x;
         int y;
         string str;
 
-        public TextItem(int x, int y, string str, ConsoleColor bgColor, ConsoleColor fgColor) : base(bgColor, fgColor)
+        public TextItem(int x, int y, string str)
         {
             this.x = x;
             this.y = y;
             this.str = str;
         }
 
-        public void Show() // Показ пункта меню
+        // Показ текста
+        public void Show()
         {
+            Console.SetCursorPosition(x, y);
             Console.BackgroundColor = bgColor;
             Console.ForegroundColor = fgColor;
-            Console.SetCursorPosition(x, y);
             Console.Write(str + "\r");
             Console.ResetColor();
         }
 
-        public void Flickering(int n, int speed) // Мигание пункта меню
+        // Мигание текста
+        public void Flickering(int n, int speed)
         {
-            for (int i = 0; i < n * 2; i++)
+            for (int i = 0; i < n; i++)
             {
-                if (i % 2 == 0)
-                {
-                    Show();
-                    ReverseColors();
-                }
-                else
-                {
-                    Show();
-                }
-                Thread.Sleep(speed);
+                Show();
+                ReverseColors();
+
+                Thread.Sleep(1000 / speed);
             }
             Console.Clear();
         }
 
+        // Меняет местами цвета
         public void ReverseColors()
         {
             ConsoleColor temp = bgColor;

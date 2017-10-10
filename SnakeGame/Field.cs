@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace SnakeGame
 {
-    class Field : ColorObject
+    class Field : Colored
     {
         // Символ поля
         char fieldCh;
@@ -14,7 +14,7 @@ namespace SnakeGame
         int columns;
         int rows;
 
-        public Field(int columns, int rows, char fieldCh, ConsoleColor bgColor, ConsoleColor fgColor) : base(bgColor, fgColor)
+        public Field(int columns, int rows, char fieldCh)
         {
             this.fieldCh = fieldCh;
             this.columns = columns;
@@ -24,18 +24,15 @@ namespace SnakeGame
         public void Draw()
         {
             Console.SetCursorPosition(0, 0);
+            Console.BackgroundColor = bgColor;
+            Console.ForegroundColor = fgColor;
+
             for (int i = 0; i < rows; i++)
             {
-                Console.BackgroundColor = bgColor;
-                Console.ForegroundColor = fgColor;
                 Console.WriteLine(new string(fieldCh, columns));
             }
-        }
 
-        public void GetLimits(out Point p1, out Point p2)
-        {          
-            p1 = new Point(0, 0, fieldCh, bgColor, fgColor);
-            p2 = new Point(columns, rows, fieldCh, bgColor, fgColor);
+            Console.ResetColor();
         }
     }
 }
