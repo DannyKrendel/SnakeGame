@@ -15,6 +15,7 @@ namespace SnakeGame
         public static int Score { get; set; }
         public static int HighScore { get; set; }
         public static int Length { get; set; }
+        public static double Speed { get; set; }
         public static int Moves { get; set; }
         public static int DeathCount { get; set; }
 
@@ -24,12 +25,10 @@ namespace SnakeGame
             Y = writeY;
 
             Score = 0;
-            HighScore = 0;
-            Length = Snake.Length;
             Moves = 0;
-            DeathCount = 0;
         }
 
+        // Вывод статистики
         public static void Show(ConsoleColor bgColor = ConsoleColor.Black, ConsoleColor fgColor = ConsoleColor.White)
         {
             Console.SetCursorPosition(X, Y);
@@ -43,19 +42,13 @@ namespace SnakeGame
             Console.CursorLeft = X;
             Console.WriteLine($"Длина змейки: {Length}");
             Console.CursorLeft = X;
-            Console.WriteLine($"Пройденное расстояние: {Moves}");
+            Console.WriteLine($"Скорость змейки: {Speed.ToString("#.##")}");
+            Console.CursorLeft = X;
+            Console.WriteLine($"Клеток пройдено: {Moves}");
             Console.CursorLeft = X;
             Console.Write($"Смертей: {DeathCount}");
 
             Console.ResetColor();
-        }
-
-        public static void SetToZero()
-        {
-            Score = 0;
-            Length = 3;
-            Moves = 0;
-            DeathCount = 0;
         }
     }
 }

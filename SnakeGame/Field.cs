@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace SnakeGame
 {
-    class Field : IColor
+    class Field : Colored
     {
         // Символ поля
         char fieldCh;
@@ -21,7 +21,7 @@ namespace SnakeGame
             this.rows = rows;
         }
 
-        public void Draw(ConsoleColor bgColor = ConsoleColor.Black, ConsoleColor fgColor = ConsoleColor.White)
+        public void Draw()
         {
             Console.SetCursorPosition(0, 0);
             Console.BackgroundColor = bgColor;
@@ -29,9 +29,9 @@ namespace SnakeGame
 
             for (int i = 0; i < rows; i++)
             {
-
                 Console.WriteLine(new string(fieldCh, columns));
             }
+
             Console.ResetColor();
         }
     }

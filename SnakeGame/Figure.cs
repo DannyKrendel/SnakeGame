@@ -6,18 +6,21 @@ using System.Threading;
 
 namespace SnakeGame
 {
-    class Figure : IColor
+    class Figure : Colored
     {
+        // Список точек фигуры
         protected List<Point> pList;
 
-        public void Draw(ConsoleColor bgColor = ConsoleColor.Black, ConsoleColor fgColor = ConsoleColor.White)
+        // Рисование точек фигуры
+        public void Draw()
         {
             foreach (Point p in pList)
             {
-                p.Draw(bgColor, fgColor);
+                p.SetColor(bgColor, fgColor);
+                p.Draw();
             }
         }
-
+        // Проверка столкновения фигуры с фигурой
         internal bool IsHit(Figure figure)
         {
             foreach (var p in pList)
@@ -27,7 +30,7 @@ namespace SnakeGame
             }
             return false;
         }
-
+        // Проверка столкновения фигуры с точкой
         internal bool IsHit(Point point)
         {
             foreach (var p in pList)

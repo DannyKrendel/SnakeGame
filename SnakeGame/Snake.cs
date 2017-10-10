@@ -10,15 +10,24 @@ namespace SnakeGame
     {
         // Символ змейки
         char bodyCh;
-        // Длина
-        public static int Length { get; set; }
-        // Направление
-        Direction direction;
 
-        ConsoleColor bgColor;
-        ConsoleColor fgColor;
+        // Длина змейки
+        int length;
+        public int Length
+        {
+            get => length;
+            set
+            {
+                if (value > 0)
+                    length = value;
+            }
+        }
 
-        public Snake(Point p, int length, Direction direction, ConsoleColor bgColor = ConsoleColor.Black, ConsoleColor fgColor = ConsoleColor.White)
+        // Направление змейки
+        public Direction Direction{ get; set; }
+
+        // Точка начала змейки (хвост), начальная длина, начальное направление
+        public Snake(Point p, int length, Direction direction)
         {
             pList = new List<Point>();
 
@@ -26,32 +35,33 @@ namespace SnakeGame
 
             Length = length;
 
-            this.direction = direction;
+            Direction = direction;
 
-            this.bgColor = bgColor;
-            this.fgColor = fgColor;
-
-            for (int i = 0; i < length; i++)
+            // Добавление точек в список
+            for (int i = 0; i < Length; i++)
             {
                 Point body = new Point(p);
                 body.Move(i, direction);
+                body.SetColor(bgColor, fgColor);
                 pList.Add(body);
             }
         }
 
+        // Движение змейки
         public void Move()
         {
-            // Удалить хвост
             Point tail = pList.First();
-            pList.Remove(tail);
-            tail.Undraw(bgColor, fgColor);
-
-            // Добавить голову
             Point head = GetNextPoint();
+            pList.Remove(tail);
             pList.Add(head);
-            head.Draw(bgColor, fgColor);
+            // Стирание хвоста
+            tail.Undraw();
+            // Рисование головы
+            head.SetColor(bgColor, fgColor);
+            head.Draw();
         }
 
+        // Проверка поглощения пищи
         public bool Eat(Point food)
         {
             Point head = GetNextPoint();
@@ -59,49 +69,58 @@ namespace SnakeGame
             if (head.IsHit(food))
             {
                 pList.Add(head);
-                head.Draw(bgColor, fgColor);
+                head.SetColor(bgColor, fgColor);
+                head.Draw();
                 return true;
             }
             return false;
         }
 
+        // Следующая точка после головы в текущем направлении
         public Point GetNextPoint()
         {
             Point head = pList.Last();
             Point nextPoint = new Point(head);
-            nextPoint.Move(1, direction);
+            nextPoint.Move(1, Direction);
             return nextPoint;
         }
 
-        public void HandleKey(ConsoleKey key)
+        // Выбор направления
+        public void HandleKey()
         {
-            switch (key)
+            if (Console.KeyAvailable)
             {
-                case ConsoleKey.LeftArrow:
-                    if (direction != Direction.Right)
-                        direction = Direction.Left;
-                    break;
-                case ConsoleKey.RightArrow:
-                    if (direction != Direction.Left)
-                        direction = Direction.Right;
-                    break;
-                case ConsoleKey.UpArrow:
-                    if (direction != Direction.Down)
-                        direction = Direction.Up;
-                    break;
-                case ConsoleKey.DownArrow:
-                    if (direction != Direction.Up)
-                        direction = Direction.Down;
-                    break;
+                ConsoleKeyInfo cki = Console.ReadKey(true);
+                switch (cki.Key)
+                {
+                    case ConsoleKey.LeftArrow:
+                        if (Direction != Direction.Right)
+                            Direction = Direction.Left;
+                        break;
+                    case ConsoleKey.RightArrow:
+                        if (Direction != Direction.Left)
+                            Direction = Direction.Right;
+                        break;
+                    case ConsoleKey.UpArrow:
+                        if (Direction != Direction.Down)
+                            Direction = Direction.Up;
+                        break;
+                    case ConsoleKey.DownArrow:
+                        if (Direction != Direction.Up)
+                            Direction = Direction.Down;
+                        break;
+                }
             }
         }
 
+        // Столкнулась ли змейка со стеной
         public bool IsWallHit(int width, int height)
         {
             Point head = GetNextPoint();
             return head.X == 0 || head.X == width || head.Y == 0 || head.Y == height;
         }
 
+        // Столкнулась ли змейка с хвостом
         public bool IsTailHit()
         {
             Point head = GetNextPoint();

@@ -8,9 +8,13 @@ namespace SnakeGame
 {
     class Line : Figure
     {
+        // Символ, которым рисуется линия
         char lineCh;
+        // Направление линии
         Direction direction;
 
+        // Конструктор, создающий линию в указанных координатах,
+        // определенной длины и в определенном направлении
         public Line(int x, int y, int length, char ch, Direction dir)
         {
             pList = new List<Point>();

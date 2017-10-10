@@ -6,10 +6,10 @@ using System.Threading;
 
 namespace SnakeGame
 {
-    class Menu
+    class Menu : Colored
     {
         // Список пунктов меню
-        internal List<TextItem> items;
+        List<TextItem> items;
 
         // Выбранный пункт
         int selectedItem = 0;
@@ -19,6 +19,7 @@ namespace SnakeGame
             get => selectedItem;
             set
             {
+                // Предотвращение обращения к несуществующему пункту
                 if (value >= 0 && value < items.Count)
                 {
                     selectedItem = value;
@@ -26,19 +27,23 @@ namespace SnakeGame
             }
         }
 
+        // Помещение пунктов в список
         public Menu(List<TextItem> items)
         {
             this.items = new List<TextItem>(items);
         }
 
-        public void Show() // Вывод меню
+        // Вывод меню
+        public void Show()
         {
             foreach (TextItem item in items)
             {
+                item.SetColor(bgColor, fgColor);
                 item.Show();
             }
         }
 
+        // Выбор пункта
         public int SelectItem()
         {
             items[SelectedItem].ReverseColors();
